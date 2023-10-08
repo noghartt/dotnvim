@@ -21,6 +21,8 @@ require('lazy').setup({
 
   { 'folke/which-key.nvim', opts = {} },
 
+  { 'windwp/nvim-autopairs', event = 'InsertEnter', opts = {} },
+
   {
     'neovim/nvim-lspconfig',
     dependencies = {
@@ -46,6 +48,8 @@ require('lazy').setup({
       'rafamadriz/friendly-snippets',
     },
   },
+
+  { 'numToStr/Comment.nvim', opts = {} },
 
   {
     'lewis6991/gitsigns.nvim',
@@ -84,7 +88,13 @@ require('lazy').setup({
     },
     build = ':TSUpdate',
   },
-}, {});
+
+  { 'catppuccin/nvim', name = 'catppuccin', priority = 1000 },
+}, {
+  install = {
+    colorscheme = { 'catppuccin-late' }
+  }
+});
 
 vim.o.hlsearch = false
 vim.wo.number = true
@@ -138,7 +148,7 @@ vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = 
 
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup({
-    ensure_installed = { 'lua', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim' },
+    ensure_installed = { 'lua', 'rust', 'tsx', 'javascript', 'typescript', 'vim' },
     auto_install = false,
 
     highlight = { enable = true },
@@ -273,7 +283,18 @@ cmp.setup {
   },
 }
 
-require("ibl").setup()
+require('catppuccin').setup({
+  flavour = "latte",
+  integrations = {
+    neotree = true,
+    gitsigns = true,
+    mason = true,
+    treesitter = true,
+    telescope = true,
+  },
+})
+
+vim.cmd [[colorscheme catppuccin]]
 
 -- The line beneath this is called `modeline`. See `:help modeline`
--- vim: ts=2 sts=2 sw=2 et
+-- vim: ts=2 sts=2 sw=2 et:
