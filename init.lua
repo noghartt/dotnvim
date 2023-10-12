@@ -19,7 +19,15 @@ require('lazy').setup({
   'tpope/vim-rhubarb',
   'tpope/vim-sleuth',
 
-  { 'folke/which-key.nvim', opts = {} },
+  {
+    'folke/which-key.nvim',
+    event = "VeryLazy",
+    init = function ()
+      vim.o.timeout = true
+      vim.o.timeoutlen = 300
+    end,
+    opts = {},
+  },
 
   { 'windwp/nvim-autopairs', event = 'InsertEnter', opts = {} },
 
@@ -49,7 +57,7 @@ require('lazy').setup({
     },
   },
 
-  { 'numToStr/Comment.nvim', opts = {} },
+  { 'numToStr/Comment.nvim', opts = {}, lazy = false },
 
   {
     'lewis6991/gitsigns.nvim',
@@ -90,6 +98,8 @@ require('lazy').setup({
   },
 
   { 'catppuccin/nvim', name = 'catppuccin', priority = 1000 },
+
+  { 'natecraddock/workspaces.nvim', opts = {} },
 }, {
   install = {
     colorscheme = { 'catppuccin-late' }
@@ -127,24 +137,7 @@ require('telescope').setup({
 })
 
 pcall(require('telescope').load_extension, 'fzf')
-
-vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
-vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
-vim.keymap.set('n', '<leader>/', function()
-  -- You can pass additional configuration to telescope to change theme, layout, etc.
-  require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-    winblend = 10,
-    previewer = false,
-  })
-end, { desc = '[/] Fuzzily search in current buffer' })
-
-vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
-vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
-vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
-vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
-vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
-vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
-vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
+pcall(require('telescope').load_extension, 'workspaces')
 
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup({
@@ -166,23 +159,16 @@ vim.defer_fn(function()
 end, 0)
 
 local on_attach = function(_, bufnr)
-  local nmap = function(keys, func, desc)
-    if desc then
-      desc = 'LSP: ' .. desc
-    end
-
-    vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
-  end
-
-  nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-  nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
-
-  nmap('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
-  nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferenceas')
-  nmap('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
-  nmap('<leader>D', vim.lsp.buf.type_definition, 'Type [D]efinition')
-  nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
-  nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+  require('which-key').register({
+    i = { require('telescope.builtin').lsp_implementations, "Goto implementation" },
+    r = { require('telescope.builtin').lsp_references, "Goto references" },
+    d = { vim.lsp.buf.definition, "Goto definition" },
+    t = { vim.lsp.buf.type_definition, "Type definition" },
+  }, {
+    prefix = "<leader>c",
+    buffer = bufnr,
+    name = "code",
+  })
 
   vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
     vim.lsp.buf.format()
@@ -190,14 +176,52 @@ local on_attach = function(_, bufnr)
 end
 
 require('which-key').register({
-  ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-  ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-  ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
-  ['<leader>h'] = { name = 'More git', _ = 'which_key_ignore' },
-  ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-  ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-  ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-})
+  ["<space>"] = { "<cmd>Telescope buffers<cr>", "List buffers" },
+  ["/"] = {
+    function ()
+      require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
+        winblend = 10,
+        previewer = false,
+      })
+    end,
+    "Fuzzy search in current buffer"
+  },
+  f = {
+    name = "file",
+    f = { "<cmd>Telescope find_files<cr>", "Find file" },
+    r = { "<cmd>Telescope oldfiles<cr>", "Find recent files", noremap = false },
+    n = { "<cmd>enew<cr>", "New File" },
+    s = { "<cmd>w<cr>", "Save file" },
+  },
+  c = {
+    name = "code",
+    a = { vim.lsp.buf.code_action, "Code Action" },
+    r = { vim.lsp.buf.rename, "Rename" },
+    s = {
+      name = "symbols",
+      d = { require('telescope.builtin').lsp_document_symbols, "Document symbols" },
+      w = { require('telescope.builtin').lsp_dynamic_workspace_symbols, "Workspace symbols" },
+    },
+  },
+  q = {
+    name = "quit",
+    q = { "<cmd>qa!<CR>", "Quit all (will lose everything)", noremap = false },
+    a = { "<cmd>qa<CR>", "Quit all", noremap = false  }
+  }
+}, { prefix = "<leader>" })
+
+-- TODO: Fix this to use the Option macOS key
+local modes = {
+  n = { pre = "", op = { up = ".", down = "." }, pos = "==" },
+  i = { pre = "<Esc>", op = { up = ".", down = "." }, pos = "==gi" },
+  v = { pre = "", op = { up = "'>", down = "'<" }, pos = "gv=gv" },
+}
+for mode, opts in pairs(modes) do
+  vim.keymap.set(mode, '<S-j>', opts.pre .. ":m " .. opts.op.down .. "+1<CR>" .. opts.pos, { silent = true, noremap = true })
+  vim.keymap.set(mode, '<S-Down>', opts.pre .. ":m " .. opts.op.down .. "+1<CR>" .. opts.pos, { silent = true, noremap = true })
+  vim.keymap.set(mode, '<S-k>', opts.pre .. ":m " .. opts.op.up .. "-2<CR>" .. opts.pos, { silent = true, noremap = true })
+  vim.keymap.set(mode, '<S-Up>', opts.pre .. ":m " .. opts.op.up .. "-2<CR>" .. opts.pos, { silent = true, noremap = true })
+end
 
 require('mason').setup()
 require('mason-lspconfig').setup()
@@ -295,6 +319,8 @@ require('catppuccin').setup({
 })
 
 vim.cmd [[colorscheme catppuccin]]
+
+require('workspaces').setup()
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et:
