@@ -207,6 +207,16 @@ require('which-key').register({
     name = "quit",
     q = { "<cmd>qa!<CR>", "Quit all (will lose everything)", noremap = false },
     a = { "<cmd>qa<CR>", "Quit all", noremap = false  }
+  },
+  h = {
+    name = "help",
+    c = {
+      function()
+        local config_file = vim.fn.expand("$HOME/.config/nvim/init.lua")
+        vim.cmd.edit(config_file)
+      end,
+      "Open config file"
+    },
   }
 }, { prefix = "<leader>" })
 
