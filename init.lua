@@ -100,6 +100,7 @@ require('lazy').setup({
   { 'catppuccin/nvim', name = 'catppuccin', priority = 1000 },
 
   { 'natecraddock/workspaces.nvim', opts = {} },
+
 }, {
   install = {
     colorscheme = { 'catppuccin-late' }
@@ -119,6 +120,11 @@ vim.o.updatetime = 250
 vim.o.timeoutlen = 300
 vim.o.completeopt = 'menuone,noselect'
 vim.o.termguicolors = true
+
+vim.g.netrw_keepdir = false
+vim.g.netrw_winsize = 30
+vim.g.netrw_banner = false
+vim.g.netrw_localcopydircmd = "cp -r"
 
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 
@@ -217,21 +223,20 @@ require('which-key').register({
       end,
       "Open config file"
     },
-  }
+    r = {
+      function ()
+        local config_file = vim.fn.expand("$HOME/.config/nvim/init.lua")
+        vim.cmd.luafile(config_file)
+      end,
+      "Reload config file"
+    },
+  },
+  o = {
+    name = "open",
+    n = { "<cmd>Lexplore<CR>", "netrw" }
+  },
+  w = { "<c-w>", "window", noremap = false },
 }, { prefix = "<leader>" })
-
--- TODO: Fix this to use the Option macOS key
-local modes = {
-  n = { pre = "", op = { up = ".", down = "." }, pos = "==" },
-  i = { pre = "<Esc>", op = { up = ".", down = "." }, pos = "==gi" },
-  v = { pre = "", op = { up = "'>", down = "'<" }, pos = "gv=gv" },
-}
-for mode, opts in pairs(modes) do
-  vim.keymap.set(mode, '<S-j>', opts.pre .. ":m " .. opts.op.down .. "+1<CR>" .. opts.pos, { silent = true, noremap = true })
-  vim.keymap.set(mode, '<S-Down>', opts.pre .. ":m " .. opts.op.down .. "+1<CR>" .. opts.pos, { silent = true, noremap = true })
-  vim.keymap.set(mode, '<S-k>', opts.pre .. ":m " .. opts.op.up .. "-2<CR>" .. opts.pos, { silent = true, noremap = true })
-  vim.keymap.set(mode, '<S-Up>', opts.pre .. ":m " .. opts.op.up .. "-2<CR>" .. opts.pos, { silent = true, noremap = true })
-end
 
 require('mason').setup()
 require('mason-lspconfig').setup()
