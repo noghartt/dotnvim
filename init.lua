@@ -128,6 +128,19 @@ require('which-key').register({
   e = {
     name = "editor",
     w = { "<cmd>Telescope workspaces<cr>", "Workspaces" },
+    t = {
+      name = "tabs",
+      t = { "<cmd>tabnew<cr>", "New tab" },
+      s = { "<cmd>tab split<cr>", "Split tab" },
+      v = { "<cmd>vsplit<cr>", "Vertical split tab" },
+      c = { "<cmd>tabclose<cr>", "Close tab" },
+      o = { "<cmd>tabonly<cr>", "Only tab" },
+      l = { "<cmd>tabs<cr>", "List tabs" },
+      p = { "<cmd>tabprevious<cr>", "Previous tab" },
+      n = { "<cmd>tabnext<cr>", "Next tab" },
+      ["<S-<>"] = { "<cmd>tabmove -1<cr>", "Move tab left" },
+      ["<S->>"] = { "<cmd>tabmove +1<cr>", "Move tab right" },
+    },
   },
   q = {
     name = "quit",
@@ -150,12 +163,14 @@ require('which-key').register({
       end,
       "Reload config file"
     },
+    k = { "<cmd>Telescope keymaps<CR>", "Keymaps" },
   },
   o = {
     name = "open",
     n = { "<cmd>Lexplore<CR>", "netrw" },
     t = { "<cmd>Telescope<CR>", "Telescope" },
     o = { "<cmd>Oil<CR>", "Oil" },
+    l = { "<cmd>Lazy<CR>", "Lazy" },
   },
   w = { "<c-w>", "window", noremap = false },
 }, { prefix = "<leader>" })
