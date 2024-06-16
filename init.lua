@@ -102,6 +102,12 @@ require('which-key').register({
     end,
     "Fuzzy search in current buffer"
   },
+  g = {
+    function ()
+      require('telescope.builtin').live_grep()
+    end,
+    "Live grep"
+  },
   f = {
     name = "file",
     f = { "<cmd>Telescope find_files<cr>", "Find file" },
@@ -118,6 +124,10 @@ require('which-key').register({
       d = { require('telescope.builtin').lsp_document_symbols, "Document symbols" },
       w = { require('telescope.builtin').lsp_dynamic_workspace_symbols, "Workspace symbols" },
     },
+  },
+  e = {
+    name = "editor",
+    w = { "<cmd>Telescope workspaces<cr>", "Workspaces" },
   },
   q = {
     name = "quit",
@@ -143,7 +153,9 @@ require('which-key').register({
   },
   o = {
     name = "open",
-    n = { "<cmd>Lexplore<CR>", "netrw" }
+    n = { "<cmd>Lexplore<CR>", "netrw" },
+    t = { "<cmd>Telescope<CR>", "Telescope" },
+    o = { "<cmd>Oil<CR>", "Oil" },
   },
   w = { "<c-w>", "window", noremap = false },
 }, { prefix = "<leader>" })
