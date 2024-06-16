@@ -244,18 +244,8 @@ cmp.setup {
   },
 }
 
-require('catppuccin').setup({
-  flavour = "latte",
-  integrations = {
-    neotree = true,
-    gitsigns = true,
-    mason = true,
-    treesitter = true,
-    telescope = true,
-  },
-})
-
-vim.cmd [[colorscheme catppuccin]]
+vim.o.background = "light"
+vim.cmd [[colorscheme gruvbox]]
 
 require('workspaces').setup()
 
